@@ -1,0 +1,198 @@
+<html>
+  <head>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <style>
+      .bs-callout {
+        padding: 20px;
+        margin: 20px 0;
+        border: 1px solid #eee;
+        border-left-width: 5px;
+        border-radius: 3px;
+      }
+
+      .bs-callout-info {
+        border-left-color: #1b809e;
+      }      
+
+      body {
+        padding: 24px;
+      }
+
+      ul li {
+        list-style-type: none;
+        margin-bottom: 12px;
+      }
+
+      .gutter-left--large {
+        padding-left: 12px;
+      }
+
+      .gutter-right--large {
+        margin-right: 12px;
+      }
+
+      .gutter-top {
+        padding-top: 6px;
+      }
+
+      .gutter-top--large {
+        padding-top: 12px;
+      }
+
+      .gutter-bottom--large {
+        padding-bottom: 12px;
+      }
+
+      .margin-top--zero {
+        margin-top: 0;
+      }
+
+      .padding-left--zero {
+        padding-left: 0;
+      }
+
+      .text--small {
+        font-size: 12px;
+      }
+
+      .text--large {
+        font-size: 16px;
+      }  
+
+      .thumbnail {
+        width: 200px;
+        height: 145px;
+        margin: 0 auto;
+      }
+
+      .order-list .thumbnail {
+        width: 100px;
+        height: 73px;
+      }
+
+      .order-list .thumbnail img {
+        width: 95px;
+        height: 65px;        
+      }
+
+      .images-edit-list .thumbnail {
+        float: left;
+        margin-right: 12px;
+        margin-bottom: 12px;        
+      }
+
+      .thumbnail img {
+        width: 190px;
+        height: 135px;        
+      }
+    </style>
+
+    <script>
+      UPLOADCARE_PUBLIC_KEY = 'ca39069cab991a7e4e9b';
+      UPLOADCARE_MANUAL_START = true;
+      UPLOADCARE_AUTOSTORE = true;
+    </script>
+  </head>
+  <body>
+    <div ng-app="goBox">
+      <div ng-controller="CustomerBoxController" ng-init="inStorage = true" ng-cloak>
+        <div class="row gutter-bottom--large">
+          <div class="col-sm-6 col-xs-12">
+            <button type="button" ng-click="inStorage = true" ng-class="{ 'btn-primary': inStorage == true }" class="btn btn-default btn-lg btn-block">In storage ({{ itemsInStorage() }})</button>
+          </div>
+          <div class="col-sm-6 col-xs-12">
+            <button type="button" ng-click="inStorage = false" ng-class="{ 'btn-primary': inStorage == false }" class="btn btn-default btn-lg btn-block">At home ({{ itemsAtHome() }})</button>          
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-sm-9 col-xs-12">
+            <ul class="padding-left--zero">
+              <li class="row bs-callout bs-callout-info margin-top--zero" ng-show="(inStorage && (customerBox.status == 1 || customerBox.status == 3)) || (!inStorage && (customerBox.status == 2 || customerBox.status == 4))" ng-repeat="customerBox in customerBoxes" ng-class="{ 'bg-success': customerBox.status == 3 || customerBox.status == 4 }">
+                <div class="col-md-4 col-sm-12">
+                  <div class="thumbnail">
+                    <img ng-src="{{ customerBox.pictures_urls[0].desktop_picture_thumbnail_url }}" />
+                  </div>
+                </div>
+                <div class="col-md-8 col-sm-12">
+                  <div class="gutter-left--large">
+                    <div class="text--large">{{ customerBox.contents }}</div>
+                    <div class="gutter-top text--small">Serienr: {{ customerBox.box_name }}</div>
+                    <div class="gutter-top--large">
+                      <button type="button" ng-if="customerBox.status == 1 || customerBox.status == 3" ng-click="orderCustomerBoxItem(customerBox)" ng-disabled="customerBox.status == 3" class="btn btn-success">Order pick-up</button>
+                      <button type="button" ng-if="customerBox.status == 2 || customerBox.status == 4" ng-click="orderCustomerBoxItem(customerBox)" ng-disabled="customerBox.status == 4" class="btn btn-success">Order drop-off</button>
+                      <button type="button" ng-click="openCustomerBoxItem(customerBox)" class="btn btn-default">Edit</button>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="col-sm-3 col-xs-12 bg-success gutter-bottom--large">
+            <h4>My order</h4>
+
+            <p>{{ numberBoxesChosen() }} boxes chosen</p>
+
+            <ul class="order-list padding-left--zero">
+              <li class="row" ng-show="(customerBox.status == 3) || (customerBox.status == 4)" ng-repeat="customerBox in customerBoxes">
+                <div class="col-md-4 col-sm-12">
+                  <div class="thumbnail">
+                    <img ng-src="{{ customerBox.pictures_urls[0].desktop_picture_thumbnail_url }}" />
+                  </div>
+                </div>
+                <div class="col-md-8 col-sm-12">
+                  <div class="gutter-left--large">
+                    <div class="text--small">{{ customerBox.contents }}</div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+
+            <div class="gutter-top--large">
+              <button type="button" class="btn btn-lg btn-block btn-success" ng-disabled="numberBoxesChosen() == 0">Order a trip</button>  
+            </div>
+          </div>
+        </div>
+
+        <script type="text/ng-template" id="editItem.html">
+          <div class="modal-dialog">
+            <div class="modal-body">
+              <carousel no-wrap="false" ng-if="!editingCustomerBoxItem">
+                <slide ng-repeat="slide in slides" active="slide.active">
+                  <img ng-src="{{slide.image}}" style="margin:auto;">
+                </slide>
+              </carousel>            
+              <div class="images-edit-list" ng-if="editingCustomerBoxItem">
+                <ul class="padding-left--zero">
+                  <li ng-repeat="pictureUrl in selectedCustomerBox.pictures_urls">
+                    <div class="thumbnail">
+                      <img ng-src="{{ pictureUrl.desktop_picture_thumbnail_url }}" />
+                    </div>                  
+                  </li>
+                  <li>
+                    <uploader ng-model="$parent.$parent.imageUploaded" image-width="570" image-height="405" thumbnail-width="190" thumbnail-height="135" aspect-ratio="38:27"></uploader>             
+                  </li>
+                </ul>
+              </div>
+
+              <div class="customerbox-details gutter-top--large">
+                <div ng-if="!editingCustomerBoxItem" class="text--large">{{ selectedCustomerBox.contents }}</div>
+                <textarea ng-if="editingCustomerBoxItem" ng-model="$parent.selectedCustomerBox.contents" class="form-control text--large"></textarea>
+                <div class="gutter-top text--small">Serienr: {{ selectedCustomerBox.box_name }}</div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" ng-if="selectedCustomerBox.status == 1 || selectedCustomerBox.status == 3" ng-click="orderCustomerBoxItem(selectedCustomerBox)" ng-disabled="selectedCustomerBox.status == 3" class="btn btn-success">Order pick-up</button>
+              <button type="button" ng-if="selectedCustomerBox.status == 2 || selectedCustomerBox.status == 4" ng-click="orderCustomerBoxItem(selectedCustomerBox)" ng-disabled="selectedCustomerBox.status == 4" class="btn btn-success">Order drop-off</button>              <button type="button" ng-if="!editingCustomerBoxItem" ng-click="editCustomerBoxItem()" class="btn btn-default">Edit</button>
+              <button type="button" ng-if="editingCustomerBoxItem" ng-click="previewCustomerBoxItem()" class="btn btn-default">Preview</button>
+              <button type="button" ng-disabled="!editingCustomerBoxItem" ng-click="saveCustomerBoxItem()" class="btn btn-primary">Save</button>
+            </div>
+          </div> 
+        </script>
+      </div>
+    </div>
+
+    <script type="text/javascript" src="dist/bundle.js" charset="utf-8"></script>
+
+  </body>
+</html>
