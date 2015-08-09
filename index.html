@@ -183,7 +183,8 @@
             </div>
             <div class="modal-footer">
               <button type="button" ng-if="selectedCustomerBox.status == 1 || selectedCustomerBox.status == 3" ng-click="orderCustomerBoxItem(selectedCustomerBox)" ng-disabled="selectedCustomerBox.status == 3" class="btn btn-success">Order pick-up</button>
-              <button type="button" ng-if="selectedCustomerBox.status == 2 || selectedCustomerBox.status == 4" ng-click="orderCustomerBoxItem(selectedCustomerBox)" ng-disabled="selectedCustomerBox.status == 4" class="btn btn-success">Order drop-off</button>              <button type="button" ng-if="!editingCustomerBoxItem" ng-click="editCustomerBoxItem()" class="btn btn-default">Edit</button>
+              <button type="button" ng-if="selectedCustomerBox.status == 2 || selectedCustomerBox.status == 4" ng-click="orderCustomerBoxItem(selectedCustomerBox)" ng-disabled="selectedCustomerBox.status == 4" class="btn btn-success">Order drop-off</button>              
+              <button type="button" ng-if="!editingCustomerBoxItem" ng-click="editCustomerBoxItem()" class="btn btn-default">Edit</button>
               <button type="button" ng-if="editingCustomerBoxItem" ng-click="previewCustomerBoxItem()" class="btn btn-default">Preview</button>
               <button type="button" ng-disabled="!editingCustomerBoxItem" ng-click="saveCustomerBoxItem()" class="btn btn-primary">Save</button>
             </div>
